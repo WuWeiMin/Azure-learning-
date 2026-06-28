@@ -1,6 +1,6 @@
 <!-- 目标路径: README.md（仓库根目录，不需要建文件夹）-->
 
-# Lucy's Dev Learning Repo
+# Ken's Dev Learning Repo
 
 个人学习/实践笔记仓库，记录 Azure、Dynamics 365、C# 等技术学习过程，方便在公司用GitHub随时查看。
 
