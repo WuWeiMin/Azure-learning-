@@ -1,0 +1,22 @@
+# 本地配置文件（包含真实连接字符串/密码，不要提交到GitHub）
+appsettings.local.json
+appsettings.Development.json
+*.env
+.env
+local.settings.json
+
+# 常见的密钥/凭证文件
+*.pfx
+*.key
+*.pem
+secrets.json
+
+# Visual Studio / .NET 编译产物
+bin/
+obj/
+*.user
+.vs/
+
+# 系统文件
+.DS_Store
+Thumbs.db
