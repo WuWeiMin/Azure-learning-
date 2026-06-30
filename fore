@@ -1,0 +1,45 @@
+Console.WriteLine($"开始多线程创建 {entityLogicalName} 记录，总数: {totalRecordsToCreate}, 并发度: {degreeOfParallelism}");
+
+int successCount = 0;
+int failCount = 0;
+object lockObj = new object();
+
+var stopwatch = Stopwatch.StartNew();
+
+Parallel.ForEach(
+    Enumerable.Range(1, totalRecordsToCreate),
+    new ParallelOptions
+    {
+        MaxDegreeOfParallelism = degreeOfParallelism
+    },
+    i =>
+    {
+        using (var threadClient = serviceClient.Clone())
+        {
+            var entity = new Entity(entityLogicalName);
+            entity["demo_name"] = $"Test {entityLogicalName} {i}";
+
+            try
+            {
+                var id = threadClient.Create(entity);
+                Console.WriteLine($"[线程 {Thread.CurrentThread.ManagedThreadId}] 已创建记录 {i}, Id = {id}");
+                lock (lockObj) { successCount++; }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[线程 {Thread.CurrentThread.ManagedThreadId}] 创建记录 {i} 失败: {ex.Message}");
+                lock (lockObj) { failCount++; }
+            }
+        }
+    }
+);
+
+stopwatch.Stop();
+
+double totalSeconds = stopwatch.Elapsed.TotalSeconds;
+double tps = totalRecordsToCreate / totalSeconds;
+
+Console.WriteLine("全部创建任务完成。");
+Console.WriteLine($"成功: {successCount}, 失败: {failCount}");
+Console.WriteLine($"总耗时: {totalSeconds:F2} 秒");
+Console.WriteLine($"平均 TPS: {tps:F2} 条/秒");
