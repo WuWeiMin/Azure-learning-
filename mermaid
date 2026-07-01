@@ -26,3 +26,5 @@ call "C:\Users\E153773\AppData\Roaming\npm\mmdc.cmd" -i "%INPUT%" -o "%OUTPUT%" 
 
 reg delete "HKCU\Software\Classes\mmdfile\shell\Convert to PNG" /v "Extended" /f
 
+@echo off
+"C:\Program Files\Git\bin\bash.exe" --login -i -c "eval $(ssh-agent -s); ssh-add ~/.ssh/id_ed25519"
