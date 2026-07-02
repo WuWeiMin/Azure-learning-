@@ -21,3 +21,28 @@ public bool AttributeExists(
         return false;
     }
 }
+
+
+
+
+public static string[] GetLookupTargetEntities(
+    IOrganizationService service,
+    string entityLogicalName,
+    string lookupFieldLogicalName)
+{
+    var request = new RetrieveAttributeRequest
+    {
+        EntityLogicalName = entityLogicalName,
+        LogicalName = lookupFieldLogicalName
+    };
+
+    var response = (RetrieveAttributeResponse)service.Execute(request);
+
+    if (response.AttributeMetadata is not LookupAttributeMetadata lookupMetadata)
+    {
+        throw new InvalidPluginExecutionException(
+            $"{lookupFieldLogicalName} 不是 Lookup 字段。");
+    }
+
+    return lookupMetadata.Targets;
+}
