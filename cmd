@@ -34,3 +34,11 @@ script.onerror = function (event) {
 };
 
 document.head.appendChild(script);
+
+function onFormLoad(executionContext) {
+    var formContext = executionContext.getFormContext();
+    Ripple.Utils.NotificationHelper.init(formContext, "zh");
+    Ripple.Utils.NotificationHelper.showFormMessage("工具库加载成功", "INFO", "init_test");
+}
+
+
