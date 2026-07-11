@@ -25,3 +25,23 @@ async function handleSave(formContext) {
         isSavingViaHandler = false;
     }
 }
+
+
+
+function onFormLoad(executionContext) {
+    console.log("=== onFormLoad 触发，时间：", new Date().toISOString());
+    var formContext = executionContext.getFormContext();
+    Ripple.Utils.NotificationHelper.init(formContext, "en");
+
+    formContext.data.entity.addOnSave(function (econtext) {
+        console.log("=== onSave handler 被调用，isSavingViaHandler =", isSavingViaHandler);
+        if (isSavingViaHandler) {
+            console.log("=== 检测到重入，直接放行");
+            return;
+        }
+        econtext.getEventArgs().preventDefault();
+        handleSave(formContext);
+    });
+}
+
+
