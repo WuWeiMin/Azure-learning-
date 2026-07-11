@@ -14,3 +14,23 @@ window.D365Commands = SampleCommands;
 console.log("D365Dialog library loaded.");
 
 export { DialogService, SampleCommands };
+
+
+
+const script = document.createElement("script");
+
+script.src =
+  Xrm.Utility.getGlobalContext().getClientUrl() +
+  "/WebResources/new_/D365Dialog/d365dialog.min.js?time=" +
+  Date.now();
+
+script.onload = function () {
+  console.log("Script loaded manually");
+  console.log("D365Dialog type:", typeof window.D365Dialog);
+};
+
+script.onerror = function (event) {
+  console.error("Script load failed", event, script.src);
+};
+
+document.head.appendChild(script);
