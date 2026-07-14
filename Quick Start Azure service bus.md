@@ -1,0 +1,134 @@
+<!-- 目标路径: notes/azure/service-bus-quickstart.md -->
+
+# Azure Service Bus Quick Start
+
+## 1. 这是什么
+
+Service Bus 是 Azure 提供的**消息队列/消息代理服务**，用于在不同系统、应用之间异步传递消息，避免系统直接耦合。
+
+常见场景：
+- Dynamics 365 插件触发后，把数据丢进队列，由另一个系统异步处理
+- 解耦微服务之间的调用
+- 流量削峰（前面顶住高并发，后面慢慢消费）
+
+## 2. 核心概念
+
+| 概念 | 说明 |
+|---|---|
+| **Namespace** | Service Bus 的容器，一个命名空间下可以有多个队列/主题 |
+| **Queue（队列）** | 点对点模式，一条消息只能被一个消费者处理 |
+| **Topic（主题）+ Subscription（订阅）** | 发布/订阅模式，一条消息可以被多个订阅者各自处理一份 |
+| **Connection String** | 连接到 Namespace 的凭证字符串 |
+
+选择 Queue 还是 Topic 的简单判断：
+- 只有一个消费者处理消息 → Queue
+- 多个系统都要收到同一条消息 → Topic + Subscription
+
+## 3. 创建资源（Azure Portal 操作步骤）
+
+1. 登录 Azure Portal → 搜索 "Service Bus" → Create
+2. 填写：
+   - Resource Group（选已有的或新建）
+   - Namespace 名称（全局唯一，例如 `lucy-learning-sb`）
+   - Pricing tier：学习用选 **Basic**（最便宜，但不支持 Topic，只支持 Queue）
+     - 如果要练习 Topic，需要选 **Standard**
+3. 创建完成后，进入 Namespace → 左侧菜单 "Queues" → "+ Queue"，起个名字，比如 `learning-queue`
+
+## 4. 获取连接字符串
+
+1. Namespace 页面 → 左侧 "Shared access policies"
+2. 点击 `RootManageSharedAccessKey`（或自己新建一个权限更小的policy）
+3. 复制 **Primary Connection String**，类似：
+   ```
+   Endpoint=sb://lucy-learning-sb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=xxxxxx
+   ```
+
+⚠️ 学习时可以用 Root Key，但生产环境建议用 **Managed Identity**（后面单独整理一份笔记）。
+
+## 5. C# 代码示例：发送消息
+
+需要 NuGet 包：`Azure.Messaging.ServiceBus`
+
+```csharp
+// 目标路径: src/azure/ServiceBusSenderDemo.cs
+using Azure.Messaging.ServiceBus;
+using System;
+using System.Threading.Tasks;
+
+class ServiceBusSenderDemo
+{
+    static async Task Main()
+    {
+        string connectionString = "你的连接字符串";
+        string queueName = "learning-queue";
+
+        ServiceBusClient client = new ServiceBusClient(connectionString);
+        ServiceBusSender sender = client.CreateSender(queueName);
+
+        string messageBody = "Hello from Lucy's first Service Bus message!";
+        ServiceBusMessage message = new ServiceBusMessage(messageBody);
+
+        await sender.SendMessageAsync(message);
+        Console.WriteLine($"已发送消息: {messageBody}");
+
+        await sender.DisposeAsync();
+        await client.DisposeAsync();
+    }
+}
+```
+
+## 6. C# 代码示例：接收消息
+
+```csharp
+// 目标路径: src/azure/ServiceBusReceiverDemo.cs
+using Azure.Messaging.ServiceBus;
+using System;
+using System.Threading.Tasks;
+
+class ServiceBusReceiverDemo
+{
+    static async Task Main()
+    {
+        string connectionString = "你的连接字符串";
+        string queueName = "learning-queue";
+
+        ServiceBusClient client = new ServiceBusClient(connectionString);
+        ServiceBusReceiver receiver = client.CreateReceiver(queueName);
+
+        ServiceBusReceivedMessage receivedMessage = await receiver.ReceiveMessageAsync();
+
+        if (receivedMessage != null)
+        {
+            string body = receivedMessage.Body.ToString();
+            Console.WriteLine($"收到消息: {body}");
+
+            // 处理完成后，必须手动完成（Complete），否则消息会重新出现在队列里
+            await receiver.CompleteMessageAsync(receivedMessage);
+        }
+        else
+        {
+            Console.WriteLine("队列为空，没有消息");
+        }
+
+        await receiver.DisposeAsync();
+        await client.DisposeAsync();
+    }
+}
+```
+
+## 7. 在公司没法运行代码时怎么"学"
+
+如果公司环境没法直接跑这段代码（比如不能装SDK、不能连外网Azure），可以：
+- 先把代码逻辑读懂：发送端创建Client→创建Sender→构造Message→发送；接收端创建Receiver→接收→处理→Complete
+- 重点理解 `CompleteMessageAsync` 这一步的意义：消息默认是"锁定"状态，处理完必须显式Complete，否则锁过期后消息会被重新投递（这是Service Bus保证"至少一次"的机制）
+- 回家或用Codespaces时再实际跑一遍，验证理解是否正确
+
+## 8. 下一步学习方向
+
+- [ ] Topic + Subscription（发布订阅模式）
+- [ ] Managed Identity 连接 Service Bus（替代连接字符串，更安全）
+- [ ] Dead Letter Queue（死信队列，处理失败消息）
+- [ ] Dynamics 365 插件如何往Service Bus发消息（D365 Azure Service Endpoint）
+
+---
+*笔记创建: 2026-06-28*
