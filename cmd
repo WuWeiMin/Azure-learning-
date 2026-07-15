@@ -56,4 +56,10 @@ fetch(`/api/data/v9.2/EntityDefinitions?$select=LogicalName&$expand=Attributes($
     }
   });
 
+fetch("/api/data/v9.2/EntityDefinitions(LogicalName='aia_ebplan')/Attributes(LogicalName='aia_benefitlimittype')/Microsoft.Dynamics.CRM.MultiSelectPicklistAttributeMetadata?$expand=OptionSet($select=Options)")
+  .then(r => r.json())
+  .then(d => {
+    d.OptionSet.Options.forEach(o =>
+      console.log(o.Value, '=>', o.Label.UserLocalizedLabel.Label));
+  });
 
