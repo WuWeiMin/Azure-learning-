@@ -63,3 +63,9 @@ fetch("/api/data/v9.2/EntityDefinitions(LogicalName='aia_ebplan')/Attributes(Log
       console.log(o.Value, '=>', o.Label.UserLocalizedLabel.Label));
   });
 
+
+
+fetch("/api/data/v9.2/sdkmessageprocessingsteps?$select=name,filteringattributes,stage,mode&$filter=contains(name,'SetUtilizationBalance')")
+  .then(r => r.json())
+  .then(d => d.value.forEach(s =>
+    console.log(s.name, '| stage:', s.stage, '| filteringattributes:', s.filteringattributes || '(全部字段)')));
