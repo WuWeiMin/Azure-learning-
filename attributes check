@@ -1,101 +1,41 @@
-using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Messages;
+// ============================================================
+// 分支: Case Type=Claim, Is Migration=No, EB/IB=IB (个险理赔)
+// 前提: OriginCanProcess = TRUE
+// 数据源: Case → Medical Plan (aia_medicalplanid) 上的两个字段
+//   annual   = [incident.aia_medicalplanid.aia_annualbalance.0]   // .0 = null时按0
+//   lifetime = [incident.aia_medicalplanid.aia_lifetimebalance.0]
+// 目标: incident.aia_utilizationbalance
+// Hit Policy: 命中即停
+// ============================================================
 
-public bool AttributeExists(
-    IOrganizationService service,
-    string entityLogicalName,
-    string attributeLogicalName)
-{
-    try
+if (CaseType == Claim && IsMigration == No && EBIB == IB && OriginCanProcess) {
+
+    // ---- 行10: 没有关联Medical Plan → 不更新 ----
+    if ( MedicalPlan 为空 )                                // E列 DoesNotContainData
     {
-        service.Execute(new RetrieveAttributeRequest
-        {
-            EntityLogicalName = entityLogicalName,
-            LogicalName = attributeLogicalName
-        });
-
-        return true;
+        utilizationbalance 保持不变;                        // I列 '?'
     }
-    catch (FaultException<OrganizationServiceFault>)
+    // ---- 行5: 只有年度余额 (终身余额为空) ----
+    else if ( annual有值 && lifetime为空 )                 // F=ContainsData, G=DoesNotContainData
     {
-        return false;
+        set utilizationbalance = annual;
     }
-}
-
-
-
-
-public static string[] GetLookupTargetEntities(
-    IOrganizationService service,
-    string entityLogicalName,
-    string lookupFieldLogicalName)
-{
-    var request = new RetrieveAttributeRequest
+    // ---- 行6: 只有终身余额 (年度余额为空) ----
+    else if ( annual为空 && lifetime有值 )
     {
-        EntityLogicalName = entityLogicalName,
-        LogicalName = lookupFieldLogicalName
-    };
-
-    var response = (RetrieveAttributeResponse)service.Execute(request);
-
-    if (response.AttributeMetadata is not LookupAttributeMetadata lookupMetadata)
-    {
-        throw new InvalidPluginExecutionException(
-            $"{lookupFieldLogicalName} 不是 Lookup 字段。");
+        set utilizationbalance = lifetime;
     }
-
-    return lookupMetadata.Targets;
-}
-
-using System;
-using System.ServiceModel;
-using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Messages;
-using Microsoft.Xrm.Sdk.Metadata;
-
-public static class MetadataHelper
-{
-    /// <summary>
-    /// 根据实体名称和字段Logical Name获取字段Display Name
-    /// </summary>
-    public static string GetAttributeDisplayName(
-        IOrganizationService service,
-        string entityLogicalName,
-        string attributeLogicalName)
+    // ---- 行7-9: 两者都有 → 取较小值 ----
+    else if ( annual有值 && lifetime有值 && annual >  lifetime )   // H列比较表达式
     {
-        if (service == null)
-            throw new ArgumentNullException("service");
-
-        try
-        {
-            var request = new RetrieveAttributeRequest
-            {
-                EntityLogicalName = entityLogicalName,
-                LogicalName = attributeLogicalName
-            };
-
-            var response = (RetrieveAttributeResponse)service.Execute(request);
-
-            AttributeMetadata metadata = response.AttributeMetadata;
-
-            if (metadata.DisplayName == null ||
-                metadata.DisplayName.UserLocalizedLabel == null)
-            {
-                // 有些系统字段可能没有DisplayName
-                return metadata.LogicalName;
-            }
-
-            return metadata.DisplayName.UserLocalizedLabel.Label;
-        }
-        catch (FaultException<OrganizationServiceFault> ex)
-        {
-            throw new InvalidPluginExecutionException(
-                string.Format(
-                    "Cannot retrieve metadata of attribute '{0}' from entity '{1}'. {2}",
-                    attributeLogicalName,
-                    entityLogicalName,
-                    ex.Message),
-                ex);
-        }
+        set utilizationbalance = lifetime;                 // 年度超过终身 → 受终身限制
+    }
+    else if ( annual有值 && lifetime有值 && annual <  lifetime )
+    {
+        set utilizationbalance = annual;                   // 终身更宽裕 → 受年度限制
+    }
+    else if ( annual有值 && lifetime有值 && annual == lifetime )
+    {
+        set utilizationbalance = annual;                   // 相等取哪个都一样
     }
 }
