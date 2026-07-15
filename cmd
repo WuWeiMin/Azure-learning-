@@ -69,3 +69,14 @@ fetch("/api/data/v9.2/sdkmessageprocessingsteps?$select=name,filteringattributes
   .then(r => r.json())
   .then(d => d.value.forEach(s =>
     console.log(s.name, '| stage:', s.stage, '| filteringattributes:', s.filteringattributes || '(全部字段)')));
+
+
+fetch("/api/data/v9.2/north52_formulas(1677d15b-a4ef-4a5c-a724-aa1caacbb63c)")
+  .then(r => r.json())
+  .then(d => {
+    // 先把所有字段名和值打出来,找存储过滤字段的那个
+    Object.entries(d)
+      .filter(([k, v]) => typeof v === 'string' && v.length > 0 && !k.startsWith('@'))
+      .forEach(([k, v]) => console.log(k, '=>', v.substring(0, 300)));
+  });
+
