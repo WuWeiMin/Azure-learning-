@@ -7,3 +7,5 @@ fetch("/api/data/v9.2/EntityDefinitions?$select=LogicalName&$expand=Attributes($
     const hits = d.value.filter(e => e.Attributes.length > 0).map(e => e.LogicalName);
     console.log(`共 ${hits.length} 个表:`, hits);
   });
+
+https://你的环境.crm5.dynamics.com/api/data/v9.2/EntityDefinitions(LogicalName='aia_ebplan')/Attributes(LogicalName='aia_benefitlimittype')/Microsoft.Dynamics.CRM.PicklistAttributeMetadata?$expand=OptionSet($select=Options)
