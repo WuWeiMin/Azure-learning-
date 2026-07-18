@@ -1,0 +1,22 @@
+Company
+→ EB Policy
+→ EB Plan / Policy Profile
+→ Member
+→ Product / Benefit
+→ Patient Search
+→ Eligibility Check
+→ Medical Request
+   ├── Inpatient
+   ├── Outpatient
+   ├── Maternity
+   ├── Procedure
+   ├── E-Referral
+   └── Screening
+→ STP / QMS / Manual Assessment
+→ Approved / Declined / Deferment
+→ GL
+→ Treatment
+→ Discharge / Bill
+→ Final GL
+→ Claim Completed
+→ Notification / Report
