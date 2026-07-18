@@ -1,0 +1,21 @@
+Contact / Insured
+→ IB Policy
+→ Policy Plan / Top-Up Plan
+→ Plan Code / Benefit Code
+→ Patient Search
+→ Policy Active Check
+→ Waiting Period Check
+→ Premium Status Check
+→ Cash Value Check
+→ Utilization Balance Check
+→ Medical Request
+   ├── Inpatient
+   └── Outpatient
+→ STP / QMS / Manual Assessment
+→ Approved / Declined / Deferment
+→ GL
+→ Treatment
+→ Bill
+→ Final GL
+→ Claim Completed
+→ Notification / Report
