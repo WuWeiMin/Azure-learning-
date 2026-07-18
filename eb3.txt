@@ -1,0 +1,6 @@
+New Visit / Follow-Up / Medication / Procedure
+→ Assessment
+→ GL
+→ OP Bill
+→ OP Amended Bill / OP Final Bill
+→ Completed
