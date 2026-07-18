@@ -1,7 +1,0 @@
-Admission
-→ Additional GL / Top-Up
-→ Treatment
-→ Discharge
-→ Amended Bill / Final Bill
-→ Final GL
-→ Completed
