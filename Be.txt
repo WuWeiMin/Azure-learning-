@@ -1,0 +1,468 @@
+EB（Employee Benefits，团体保险）
+│
+├── 1. 团体保险基础结构
+│   │
+│   ├── 1.1 Company 企业客户
+│   │   └── 为员工及其家属购买团体医疗保险
+│   │
+│   ├── 1.2 EB Policy 团体保单
+│   │   ├── 保单状态
+│   │   ├── 保单有效期
+│   │   ├── 是否暂停
+│   │   └── 核保类别
+│   │
+│   ├── 1.3 EB Plan 团体保障计划
+│   │   └── 区分不同员工类别或保障等级
+│   │
+│   ├── 1.4 Policy Profile 保单业务档案
+│   │   ├── 连接保单、会员和保障配置
+│   │   └── 是查询保单完整业务信息的重要入口
+│   │
+│   ├── 1.5 Member 会员／被保员工及家属
+│   │   ├── 员工本人
+│   │   ├── 配偶
+│   │   ├── 子女
+│   │   └── 其他合资格家属
+│   │
+│   └── 1.6 产品与保障配置
+│       ├── Product Group 产品组
+│       ├── EB Customer Product Group 客户产品组
+│       ├── EB Customer Product 客户产品
+│       ├── Product Type 产品类型
+│       ├── Benefit Group 保障组
+│       ├── EB Customer Benefit Group 客户保障组
+│       ├── EB Customer Benefit 客户实际保障
+│       └── Benefit Code 标准保障代码
+│
+├── 2. 医疗服务参与方
+│   │
+│   ├── 2.1 Patient 患者
+│   │   └── 当前实际接受医疗服务的 Member
+│   │
+│   ├── 2.2 Provider 医疗服务机构
+│   │   ├── Hospital 医院
+│   │   ├── Clinic 诊所
+│   │   └── 其他合作医疗机构
+│   │
+│   ├── 2.3 Doctor 医生
+│   │   ├── 所属医院
+│   │   ├── Main Specialty 主专科
+│   │   └── Sub-specialty 子专科
+│   │
+│   └── 2.4 Provider Portal 医疗机构门户
+│       ├── 查询患者
+│       ├── 查看保单与保障
+│       ├── 提交医疗请求
+│       ├── 回复补件
+│       ├── 提交账单
+│       ├── 查看处理结果
+│       └── 下载报告
+│
+├── 3. Patient Search 患者查询
+│   │
+│   ├── 3.1 选择保险类型
+│   │   └── Corporate / EB
+│   │
+│   ├── 3.2 搜索患者
+│   │   ├── Member Number
+│   │   ├── Patient Name
+│   │   ├── Identification Number
+│   │   ├── Policy Number
+│   │   └── 其他搜索条件
+│   │
+│   ├── 3.3 搜索结果校验
+│   │   ├── Member Active?
+│   │   ├── Policy Status Eligible?
+│   │   │   └── IF / PE / PR 等允许状态
+│   │   ├── Active Plan?
+│   │   ├── Underwriting Code Allowed?
+│   │   ├── Policy Suspended?
+│   │   └── Product Type Eligible?
+│   │
+│   └── 3.4 查询结果
+│       ├── 无有效会员 → 显示提示
+│       └── 找到有效会员
+│           ├── 显示患者列表
+│           └── 查看 Policy Details
+│
+├── 4. Request Creation Eligibility 请求创建资格判断
+│   │
+│   ├── 4.1 Privilege Card?
+│   │   └── 特权卡可能允许快速进入申请
+│   │
+│   ├── 4.2 Utilization Balance
+│   │   ├── 检查剩余保障额度
+│   │   └── 额度不足则停止申请
+│   │
+│   ├── 4.3 Waiting Period
+│   │   ├── 是否仍在等待期
+│   │   ├── 等待期天数
+│   │   └── 意外伤害可能适用例外
+│   │
+│   ├── 4.4 PHN / Panel Eligibility
+│   │   ├── 医院是否属于合资格网络
+│   │   └── 非合作医院可能需要特殊处理
+│   │
+│   ├── 4.5 Emergency Case?
+│   │   └── 急诊可能适用不同规则
+│   │
+│   ├── 4.6 Hospital Eligibility
+│   │   ├── OTEM
+│   │   ├── OTNM
+│   │   └── 具体全称仍待后续业务资料确认
+│   │
+│   ├── 4.7 Co-share / Deductible
+│   │   ├── Co-share 共付比例
+│   │   ├── Deductible 免赔额
+│   │   └── Patient Agrees?
+│   │
+│   └── 4.8 资格通过
+│       └── 进入医疗请求表单
+│
+├── 5. EB Inpatient 住院业务
+│   │
+│   ├── 5.1 Admission Request 入院申请
+│   │   │
+│   │   ├── 业务目的
+│   │   │   └── 为本次住院申请初始医疗授权和 GL
+│   │   │
+│   │   ├── 提交内容
+│   │   │   ├── Admission Information
+│   │   │   ├── Diagnosis 诊断
+│   │   │   ├── Procedures 医疗项目
+│   │   │   ├── ICD Code
+│   │   │   ├── LOS 预计住院天数
+│   │   │   └── Supporting Documents
+│   │   │
+│   │   ├── 处理方式
+│   │   │   ├── QMS 排队
+│   │   │   ├── Manual Assessment 人工审核
+│   │   │   ├── Deferment 补件
+│   │   │   └── 审核建议
+│   │   │
+│   │   └── 结果
+│   │       ├── Approved
+│   │       │   ├── Generate Approved GL
+│   │       │   ├── Generate LOG Number
+│   │       │   └── 住院流程正式开始
+│   │       └── Declined
+│   │           ├── Decline Reason
+│   │           ├── Decline Letter
+│   │           └── Appeal
+│   │
+│   ├── 5.2 Additional GL Request 追加医疗项目申请
+│   │   │
+│   │   ├── 触发场景
+│   │   │   └── 住院期间增加新的诊断、检查或治疗项目
+│   │   │
+│   │   ├── 可增加内容
+│   │   │   ├── Additional Diagnosis
+│   │   │   └── Additional Procedure
+│   │   │
+│   │   └── 审核结果
+│   │       ├── 全部批准
+│   │       ├── 部分批准
+│   │       │   └── 被拒绝的项目可申诉
+│   │       └── 全部拒绝
+│   │
+│   ├── 5.3 Top-Up Request 增加批准金额
+│   │   │
+│   │   ├── 触发场景
+│   │   │   ├── 住院时间延长
+│   │   │   ├── 药物费用增加
+│   │   │   └── 原批准金额不足
+│   │   │
+│   │   ├── 与 Additional GL 的区别
+│   │   │   ├── Additional GL = 增加医疗项目
+│   │   │   └── Top-Up = 增加批准额度
+│   │   │
+│   │   └── 处理方式
+│   │       ├── STP 自动判断
+│   │       ├── 自动批准
+│   │       └── 转人工审核
+│   │
+│   ├── 5.4 Discharge Request 出院申请
+│   │   │
+│   │   ├── 触发场景
+│   │   │   └── 患者准备出院
+│   │   │
+│   │   ├── 医院可补充
+│   │   │   ├── 新增医生
+│   │   │   ├── 新增诊断
+│   │   │   ├── 新增治疗项目
+│   │   │   └── 住院费用
+│   │   │
+│   │   ├── 费用审核
+│   │   │   ├── Validate Charges
+│   │   │   ├── AUC Required?
+│   │   │   ├── Claim Header
+│   │   │   └── Claim Details
+│   │   │
+│   │   └── 结果
+│   │       ├── Approved
+│   │       │   ├── Draft GL
+│   │       │   ├── Compare Presented Amount
+│   │       │   ├── Compare Final Amount
+│   │       │   └── Final GL
+│   │       └── Declined
+│   │           └── Appeal
+│   │
+│   ├── 5.5 Amended Bill Request 修正账单
+│   │   │
+│   │   ├── 触发原因
+│   │   │   ├── 账单金额错误
+│   │   │   ├── 费用项目错误
+│   │   │   └── 按审核员要求修改
+│   │   │
+│   │   └── 处理结果
+│   │       ├── 重新审核
+│   │       ├── 重新匹配金额
+│   │       └── 重新生成 Final GL
+│   │
+│   ├── 5.6 Final Bill Submission 最终账单
+│   │   │
+│   │   ├── 医院提交最终账单
+│   │   │
+│   │   ├── 金额必须与 AIA 最终批准金额匹配
+│   │   │
+│   │   ├── 更新后端 Claim Status
+│   │   │
+│   │   └── 完成关联的住院记录
+│   │   │
+│   │   └── 自动触发
+│   │       └── 出院批准后超过7天未提交，
+│   │           系统可自动启动 Final Bill 流程
+│   │
+│   └── 5.7 Follow-Up Post-Hospitalization 出院后随访
+│       │
+│       ├── Follow-Up GL Request
+│       │   ├── 出院后复诊或治疗申请
+│       │   ├── 新的 GL
+│       │   └── 新的 LOG Number
+│       │
+│       └── Follow-Up Bill
+│           ├── Follow-Up Bill Submission
+│           ├── Follow-Up Amended Bill
+│           └── Follow-Up Final Bill
+│
+├── 6. EB Outpatient 门诊业务
+│   │
+│   ├── 6.1 New Visit 新门诊
+│   ├── 6.2 Follow-Up Visit 复诊
+│   ├── 6.3 Medication 药物申请
+│   ├── 6.4 Medical Check-Up 体检
+│   ├── 6.5 Health Screening 健康筛查
+│   ├── 6.6 Procedural Request 医疗操作申请
+│   │   ├── Imaging Case?
+│   │   ├── First Procedural Category?
+│   │   ├── STP
+│   │   └── Manual Assessment
+│   │
+│   └── 6.7 门诊账单
+│       ├── OP Bill Submission
+│       ├── OP Amended Bill
+│       └── OP Final Bill Submission
+│
+├── 7. EB Special Medical Processes 特殊医疗流程
+│   │
+│   ├── 7.1 Maternity Request 生育申请
+│   │   ├── 仅适用于 EB
+│   │   ├── Hospitalization
+│   │   ├── Delivery
+│   │   └── Outpatient Maternity
+│   │
+│   ├── 7.2 Pre-Employment Screening 入职体检
+│   │   ├── 企业员工入职前医疗检查
+│   │   ├── 人工审核
+│   │   └── 批准后生成相应授权文件
+│   │
+│   ├── 7.3 E-Referral 电子转诊
+│   │   ├── 创建转诊申请
+│   │   ├── 保存草稿或提交
+│   │   ├── STP 判断
+│   │   ├── 生成 E-Referral GL
+│   │   └── 转入 New Visit Process
+│   │
+│   ├── 7.4 Open GL
+│   │   ├── 仅适用于 EB
+│   │   ├── 按 Policy Profile 配置资格
+│   │   ├── 按医院配置资格
+│   │   ├── 可能跳过额度检查
+│   │   └── 适用于 Admission、New Visit、
+│   │       Medical Check-Up / Health Screening
+│   │
+│   └── 7.5 Offline GL
+│       ├── 适用于核心系统中暂时没有 Member 的情况
+│       ├── 创建临时／离线 Policy Profile
+│       ├── 触发 Member 创建
+│       ├── 克隆 Benefit 配置
+│       └── 创建正式 Claim 后继续处理
+│
+├── 8. Assessment & Decision 审核与决策
+│   │
+│   ├── 8.1 STP 自动审核
+│   │   ├── Straight Through Processing
+│   │   ├── 符合规则则自动批准
+│   │   └── 不符合则转人工
+│   │
+│   ├── 8.2 QMS 队列管理
+│   │   ├── 生成 Queue Number
+│   │   ├── 判断 Priority
+│   │   ├── 选择 Queue
+│   │   ├── 判断 Assessor Availability
+│   │   ├── 补件返回原 Assessor
+│   │   └── 多名审核员时按等待时间等规则分配
+│   │
+│   ├── 8.3 Manual Assessment 人工审核
+│   │   ├── 审查保障资格
+│   │   ├── 审查诊断
+│   │   ├── 审查医疗项目
+│   │   ├── 审查费用
+│   │   └── 作出批准、拒绝或补件决定
+│   │
+│   ├── 8.4 Deferment 补件
+│   │   ├── 向 Hospital 索取资料
+│   │   ├── 向 Doctor 或第三方索取资料
+│   │   ├── 一个 Deferment 可包含多条问题
+│   │   ├── Portal 回复
+│   │   └── 补件完成后继续审核
+│   │
+│   ├── 8.5 AUC 金额澄清
+│   │   ├── Amount Under Clarification
+│   │   ├── 针对有疑问的费用金额
+│   │   ├── 可向 Provider 提问
+│   │   ├── 可向第三方提问
+│   │   └── 澄清完成后继续最终费用决定
+│   │
+│   ├── 8.6 Appeal 申诉
+│   │   ├── 针对已拒绝请求
+│   │   ├── 可针对主请求或子请求
+│   │   ├── 对部分拒绝项目申诉
+│   │   └── 重新进入 QMS / Assessment
+│   │
+│   ├── 8.7 Cancellation 取消
+│   │   ├── Cancel Request
+│   │   │   └── 仅取消某一个请求
+│   │   └── Cancel Main Claim
+│   │       ├── 取消整个医疗事件
+│   │       ├── 取消关联 LOG
+│   │       ├── 取消 IGL / FGL
+│   │       └── 取消未完成的关联请求
+│   │
+│   └── 8.8 Case Reopen 业务重开
+│       ├── 修改已批准、已完成记录
+│       ├── 修改原拒绝决定
+│       ├── 旧记录保留审计历史
+│       ├── 取消旧 GL / Claim 结果
+│       └── 创建新的修订处理周期
+│
+├── 9. GL 与 Claim 结果
+│   │
+│   ├── 9.1 GL 生命周期
+│   │   ├── Draft GL
+│   │   ├── Approved GL
+│   │   ├── Updated GL
+│   │   ├── Final GL
+│   │   └── Declined GL
+│   │
+│   ├── 9.2 Claim 生命周期
+│   │   ├── Request Received
+│   │   ├── Bill Received
+│   │   ├── In Queue
+│   │   ├── Processing Now
+│   │   ├── Deferment Sent
+│   │   ├── Deferment Responded
+│   │   ├── Pending Medical Audit
+│   │   ├── Medical Audit Responded
+│   │   ├── Approved
+│   │   ├── Declined
+│   │   ├── Completed
+│   │   ├── Closed
+│   │   └── Cancelled
+│   │
+│   └── 9.3 主要业务结果
+│       ├── 医疗授权批准
+│       ├── 医疗授权拒绝
+│       ├── 费用部分批准
+│       ├── 费用最终批准
+│       └── Claim Completed
+│
+├── 10. 沟通与服务支持
+│   │
+│   ├── 10.1 Notification
+│   │   ├── SMS
+│   │   ├── Push Notification
+│   │   ├── Email
+│   │   ├── Member
+│   │   ├── Spouse
+│   │   ├── Child
+│   │   ├── Guardian
+│   │   ├── Patient
+│   │   └── Agent
+│   │
+│   ├── 10.2 Contact Centre Call Log
+│   │   ├── 接听电话
+│   │   ├── 搜索 Patient
+│   │   ├── 查看 Case / Claim
+│   │   ├── 向来电人提供信息
+│   │   └── 保存 Call Log
+│   │
+│   ├── 10.3 Announcement 公告
+│   │   ├── 创建和发布公告
+│   │   ├── 有效日期管理
+│   │   ├── Portal 展示
+│   │   └── 阅读追踪
+│   │
+│   ├── 10.4 Library 知识库
+│   │   ├── 创建 Knowledge Article
+│   │   ├── Review
+│   │   ├── Approve
+│   │   └── Publish
+│   │
+│   └── 10.5 Report Request 报表申请
+│       ├── Provider 选择报表条件
+│       ├── 申请 Statement of Account
+│       ├── 根据 Claim Payment 生成报表
+│       ├── 状态更新为 Completed
+│       └── Provider 下载报表
+│
+└── 11. EB 业务管理与主数据支持
+    │
+    ├── 11.1 Hospital Master
+    │   ├── 医院信息维护
+    │   ├── Hospital Code 校验
+    │   ├── Vendor Code
+    │   └── Address Code
+    │
+    ├── 11.2 Doctor Master
+    │   ├── Doctor Profile
+    │   ├── Hospital Relationship
+    │   ├── Main Specialty
+    │   ├── Sub-specialty
+    │   └── Backend Client Code
+    │
+    ├── 11.3 Portal User Master
+    │   ├── Hospital Admin
+    │   ├── Normal User
+    │   ├── Super Admin
+    │   ├── Create / Update
+    │   └── Deactivate
+    │
+    ├── 11.4 EB Benefit Configurator
+    │   ├── Customer Benefit
+    │   ├── Customer Benefit Change
+    │   ├── CRM Configuration
+    │   ├── Backend Benefit
+    │   └── 根据优先级决定最终有效保障
+    │
+    ├── 11.5 Queue Assessor Setup
+    │   ├── 审核员排班
+    │   ├── 新增审核员
+    │   ├── 手工修改排班
+    │   └── Excel 上传排班
+    │
+    └── 11.6 Supervisor & Coaching
+        ├── 监督审核表现
+        ├── 识别需要辅导的 Assessor
+        ├── 创建 Coaching
+        └── Assessor 查看并完成辅导
