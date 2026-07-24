@@ -1,113 +1,192 @@
-1.2.3
-│ │ │
-│ │ └── Patch（补丁版本）
-│ └──── Minor（次版本）
-└────── Major（主版本）
+这是 Semantic Versioning + Conventional Commits + CI/CD 最有价值的地方。
 
-表示：
+实际上，CI/CD 并不是看 major.minor.patch 去决定升级，而是根据 Commit Message 自动计算应该升级 Major、Minor 还是 Patch，然后生成新的版本号。
 
-* 修复 Bug
-* 修复安全漏洞
-* 优化性能
-* 不增加新功能
-* 不影响已有功能（向后兼容）
+开发提交代码
+      │
+      ▼
+git commit
+      │
+      ▼
+Commit Message
+feat(user): add profile page
+fix(api): null exception
+feat!: remove old endpoint
+      │
+      ▼
+CI/CD (GitHub Actions / Azure DevOps / GitLab CI)
+      │
+      ▼
+解析 Commit Message
+      │
+      ├── feat → Minor
+      ├── fix → Patch
+      ├── feat! → Major
+      └── BREAKING CHANGE → Major
+      │
+      ▼
+计算新版本
+      │
+      ▼
+生成 Tag
+v1.5.0
+      │
+      ▼
+Build
+      │
+      ▼
+Deploy
 
-例如：
+举个完整例子
 
-* 修复登录失败
-* 修复 SQL 查询错误
-* 修复 UI 显示问题
+假设目前线上版本：
 
-如果你们团队采用 Conventional Commits，一般对应：
-
-fix(login): prevent null reference exception
-
-表示：
-
-增加新功能，但不会影响以前的代码。
-
-例如：
-
-* 新增导出 Excel
-* 新增 API
-* 新增一个页面
-* 新增一个 Dataverse Entity
-* 新增一个 PCF 控件
-
-已有功能仍然可以正常工作。
-
-通常对应：
-fix(login): prevent null reference exception
-feat(order): support batch import
-
-
-表示：
-
-有破坏性变更（Breaking Change）。
-
-也就是说：
-
-升级以后，旧代码可能不能用了，需要修改。
-
-例如：
-
-* 删除 API
-* 修改 API 参数
-* 删除数据库字段
-* 修改返回 JSON 结构
-* 删除插件
-* 删除配置项
-* 重构导致旧接口失效
+v2.3.5
 
 
-feat!: change authentication model
+    git commit -m "fix(login): fix timeout issue"
+
+CI/CD 读取 Commit：
+
+fix(login): ...
+
+识别：fix
+
+2.3.5
+   │
+Patch +1
+   ▼
+2.3.6
+
+然后
+
+Tag:
+v2.3.6
+
+Build
+
+Deploy
 
 
-1.0.0   第一个正式版本
+第二天有人提交：
 
-1.0.1   修复一个Bug
-1.0.2   再修复一个Bug
+git commit -m "feat(order): support batch import"
+CI/CD：
 
-1.1.0   新增导出PDF
+feat
+升级
 
-1.1.1   修复PDF乱码
+2.3.6
+   │
+Minor +1
+   ▼
+2.4.0
 
-1.2.0   新增邮件通知
+注意：
 
-1.2.1   修复邮件发送失败
+Minor 增加以后
 
-2.0.0   API全部升级，不兼容旧版本
+Patch 自动归零。
+
+第三天：
+
+git commit -m "feat(api)!: remove v1 endpoint"
 
 
-当前版本
+feat(api): remove v1 endpoint
 
-新版本
+BREAKING CHANGE:
+Old API removed.
 
-意味着什么
 
-是否通常可以放心升级
+CI/CD：
 
-1.2.3
+发现BREAKING CHANGE
 
-1.2.4
 
-修 Bug
+2.4.0
+   │
+Major +1
+   ▼
+3.0.0
 
-✅ 基本可以
 
-1.2.3
+Minor 和 Patch 全部归零。
 
-1.3.0
+CI/CD 怎么知道？
 
-新增功能
+CI/CD 不会自己理解 Commit。
 
-✅ 一般可以
+它一般使用专门工具。
 
-1.2.3
 
-2.0.0
+工具
 
-有破坏性修改
+GitHub
 
-⚠️ 需要评估
+Azure DevOps
+
+GitLab
+
+semantic-release
+
+⭐⭐⭐⭐⭐
+
+⭐⭐⭐⭐⭐
+
+⭐⭐⭐⭐⭐
+
+release-please
+
+⭐⭐⭐⭐⭐
+
+⭐⭐⭐
+
+⭐⭐⭐
+
+standard-version
+
+⭐⭐⭐⭐
+
+⭐⭐⭐⭐
+
+⭐⭐⭐⭐
+
+GitVersion
+
+⭐⭐⭐
+
+⭐⭐⭐⭐⭐(.NET 最常见)
+
+
+有没有 Breaking Change？
+      │
+      ├─有 → Major
+      │
+      └─没有
+             │
+             有没有 feat？
+                  │
+                  ├─有 → Minor
+                  │
+                  └─没有
+                         │
+                         有没有 fix？
+                              │
+                              ├─有 → Patch
+                              └─没有 → 不发布
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
